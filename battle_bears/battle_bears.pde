@@ -1,10 +1,11 @@
-
+import processing.serial.*;
 import com.dhchoi.CountdownTimer;
 import com.dhchoi.CountdownTimerService;
 
 final long SECOND_IN_MILLIS = 1000;
 final long TOTAL_COUNTDOWN = 4000;
 
+Serial fd;
 PFont font;
 PShape bearOutline;
 
@@ -19,6 +20,10 @@ float timeTextY = 400;
 
 float timeTextOffsetX = 0;
 float timeTextOffsetY = 0;
+
+int pitch = 0;
+int roll = 0;
+int heading = 0;
 
 // Colors
 
@@ -47,6 +52,9 @@ void setup() {
   timer = CountdownTimerService.getNewCountdownTimer(this).configure(SECOND_IN_MILLIS, TOTAL_COUNTDOWN);
   updateTimeText();
   
+  fd = new Serial(this, Serial.list()[2], 9600);
+  // Defer callback until new line  
+  fd.bufferUntil('\n');
 }
 
 void draw() {
@@ -70,9 +78,7 @@ void draw() {
   shapeMode(CENTER);
   translate(width / 2, height - bearOutline.height / 2 - 50);
   shape(bearOutline, 0, 0);
-  println(bearOutline.width);
   popMatrix();
-  
   
   // Player 2 (upside down)
   pushMatrix();
@@ -80,6 +86,27 @@ void draw() {
   rotate(PI);
   text(timeText, timerX, 0);
   popMatrix();
+  
+  
+  // Data coming from Arduino
+  print("Roll: ");
+  print(roll);
+  print(", Pitch: ");
+  print(pitch);
+  print(", Heading: ");
+  println(heading);
+}
+
+void serialEvent (Serial fd) 
+{
+  // get the ASCII string:
+  String rpstr = fd.readStringUntil('\n');
+  if (rpstr != null) {
+    String[] list = split(rpstr, ':');
+    pitch = ((int)float(list[0]));
+    roll = ((int)float(list[1]));
+    heading = ((int)float(list[2]));
+  }
 }
 
 void updateTimeText() {
