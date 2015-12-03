@@ -1,7 +1,31 @@
+// In order to open two instances of the IDE on OSX: 
+
+//-Open 'Applications' folder.
+//-Right-click 'Arduino', select "Show Package Contents".
+//-Open 'Contents' folder.
+//-Open 'MacOS' folder.
+//-Double-click 'JavaApplicationStub' to run it.
+
+////////////////////////////////////////////////////////////////
+
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303.h>
 
+//#include <Arduino.h>
+//#include <SPI.h>
+//#if not defined (_VARIANT_ARDUINO_DUE_X_) && not defined (_VARIANT_ARDUINO_ZERO_)
+//  #include <SoftwareSerial.h>
+//#endif
+//
+//#include "Adafruit_BLE.h"
+//#include "Adafruit_BluefruitLE_SPI.h"
+//#include "Adafruit_BluefruitLE_UART.h"
+//
+//#include "BluefruitConfig.h"
+//
+//
+//#define FACTORYRESET_ENABLE      1
 Adafruit_LSM303 lsm;
 
 void setup() {

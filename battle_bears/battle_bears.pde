@@ -5,7 +5,10 @@ import com.dhchoi.CountdownTimerService;
 final long SECOND_IN_MILLIS = 1000;
 final long TOTAL_COUNTDOWN = 4000;
 
-Serial fd;
+// dual serial port code ref http://www.tigoe.com/pcomp/code/misc/167/
+Serial portOne;
+Serial portTwo;
+
 PFont font;
 PShape bearOutline;
 
@@ -24,6 +27,11 @@ float timeTextOffsetY = 0;
 int pitch = 0;
 int roll = 0;
 int heading = 0;
+
+int pitch2 = 0;
+int roll2 = 0;
+int heading2 = 0;
+
 
 // Colors
 
@@ -54,11 +62,14 @@ void setup() {
   bearOutline = loadShape("bear-outline.svg");
 
   timer = CountdownTimerService.getNewCountdownTimer(this).configure(SECOND_IN_MILLIS, TOTAL_COUNTDOWN);
-  updateTimeText();
+  //updateTimeText();
   
-  fd = new Serial(this, Serial.list()[2], 9600);
+  portOne = new Serial(this, Serial.list()[2], 9600);
+  portTwo = new Serial(this, Serial.list()[3], 9600);
   // Defer callback until new line  
-  fd.bufferUntil('\n');
+  portOne.bufferUntil('\n');
+  portTwo.bufferUntil('\n');
+  
 }
 
 void draw() {
@@ -97,24 +108,63 @@ void draw() {
   
   
   // Data coming from Arduino
-  print("Roll: ");
+  print("PORT 1 – Roll: ");
   print(roll);
   print(", Pitch: ");
   print(pitch);
   print(", Heading: ");
-  println(heading);
+  print(heading);
+  print("  |  ");
+  
+  print("PORT 2 – Roll: ");
+  print(roll2);
+  print(", Pitch: ");
+  print(pitch2);
+  print(", Heading: ");
+  println(heading2);
 }
 
-void serialEvent (Serial fd) 
-{
-  // get the ASCII string:
-  String rpstr = fd.readStringUntil('\n');
-  if (rpstr != null) {
-    String[] list = split(rpstr, ':');
-    pitch = ((int)float(list[0]));
-    roll = ((int)float(list[1]));
-    heading = ((int)float(list[2]));
-  }
+void serialEvent (Serial thisPort) {
+  
+    // read the incoming serial data:
+  String inString = thisPort.readStringUntil('\n');
+  
+    // if the string is not empty, do stuff with it:
+  if (inString != null) {
+    // if the string came from serial port one:
+    if (thisPort == portOne) {
+      //print ("Data from port one: ");
+      String[] list = split(inString, ':');
+      pitch = ((int)float(list[0]));
+      roll = ((int)float(list[1]));
+      heading = ((int)float(list[2]));
+    }
+    
+    // if the string came from serial port two:
+    if (thisPort == portTwo) {
+      //print ("Data from port two: ");
+      String[] list = split(inString, ':');
+      pitch2 = ((int)float(list[0]));
+      roll2 = ((int)float(list[1]));
+      heading2 = ((int)float(list[2]));
+    }
+    // print the string:
+    //println(inString);
+    
+    
+  //// get the ASCII string:
+  //String rpstr = fd.readStringUntil('\n');
+  
+  //if (rpstr != null) {
+  // String[] list = split(rpstr, ':');
+  // pitch = ((int)float(list[0]));
+  // roll = ((int)float(list[1]));
+  // heading = ((int)float(list[2]));
+  //}
+}
+
+  timeTextSeconds = elapsedTime % 60;
+  timeText = nf(timeTextSeconds, 1);
 }
 
 void updateTimeText() {
