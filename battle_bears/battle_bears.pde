@@ -16,7 +16,7 @@ int timeTextSeconds = 0;
 color timeTextColor = color(255, 255, 255);
 
 float timeTextX = 100;
-float timeTextY = 400;
+float timeTextY = 100;
 
 float timeTextOffsetX = 0;
 float timeTextOffsetY = 0;
@@ -39,6 +39,10 @@ color ppColor3 = color(64, 190, 180);
 color lgColor1 = color(250, 175, 100);
 color lgColor2 = color(98, 201, 220);
 color lgColor3 = color(199, 103, 168);
+
+//Fista Cuffs beats Power Pose 
+//Power Pose beats Claws Out 
+//Claws Out beats Fista Cuffs 
 
 void setup() {
   size(600, 600);
@@ -74,17 +78,21 @@ void draw() {
   
   // Player 1
   pushMatrix();
+  translate(0, height / 2);
   text(timeText, timerX, timerY);
   shapeMode(CENTER);
-  translate(width / 2, height - bearOutline.height / 2 - 50);
+  translate(width / 2, height / 2 - bearOutline.height / 2 - 50);
   shape(bearOutline, 0, 0);
   popMatrix();
   
   // Player 2 (upside down)
   pushMatrix();
-  translate(width, height);
+  translate(width, height / 2);
   rotate(PI);
-  text(timeText, timerX, 0);
+  text(timeText, timerX, timerY);
+  shapeMode(CENTER);
+  translate(width / 2, height / 2 - bearOutline.height / 2 - 50);
+  shape(bearOutline, 0, 0);
   popMatrix();
   
   
