@@ -21,6 +21,8 @@ CountdownTimer timer;
 HashMap<String, Integer> p1Move = new HashMap<String,Integer>();
 HashMap<String, Integer> p2Move = new HashMap<String,Integer>();
 
+String[] moves = {"CLAWS OUT", "FISTA CUFFS", "POWER POSE"};
+
 // Colors
 
 // Big Brown
@@ -58,11 +60,11 @@ void setup() {
   // Setting default move angles
   p1Move.put("pitch", 0);
   p1Move.put("roll", 0);
-  p1Move.put("yaw", 0);
+  p1Move.put("heading", 0);
   
   p2Move.put("pitch", 0);
   p2Move.put("roll", 0);
-  p2Move.put("yaw", 0);
+  p2Move.put("heading", 0);
   
   Ani.init(this);
   Ani.noAutostart();
@@ -81,7 +83,7 @@ void setup() {
   timer = CountdownTimerService.getNewCountdownTimer(this).configure(SECOND_IN_MILLIS, TOTAL_COUNTDOWN);
   
   // Run serial connection when ports hardware is connected
-  //setupSerialConnection();
+  setupSerialConnection();
 }
 
 /*
@@ -106,6 +108,11 @@ void draw() {
   startCountdown.draw();
   popMatrix();
   
+  int move = getMove(p1Move.get("pitch"), p1Move.get("roll"));
+  if (move >= 0) {
+    println("PLAYER 1: " + moves[move]);
+  }
+  
   printArduinoData();
 }
 
@@ -123,6 +130,28 @@ void setupSerialConnection() {
 }
 
 /*
+ * Checks the incoming hand positions and decides on a pose
+ */
+int getMove(int pitch, int roll) {
+  if (pitch < -30) {
+    // Hands are raised
+    if (roll < 70) {
+      // Hands are rotated outward / CLAWS OUT
+      return 0;
+    } else if (roll >= 70) {
+      // Hands are rotated inward / FISTA CUFFS
+      return 1;
+    }
+  } else if (pitch > 10 && roll > 10) {
+    // Hands are lowered / POWER POSE
+    return 2;
+  }
+  
+  // No pose detected
+  return -1;
+}
+
+/*
  * Printing out data coming from Arduino
  */
 void printArduinoData() {
@@ -131,7 +160,7 @@ void printArduinoData() {
   print(", Pitch: ");
   print(p1Move.get("pitch"));
   print(", Heading: ");
-  print(p1Move.get("yaw"));
+  print(p1Move.get("heading"));
   print("  |  ");
   
   print("[PORT 2] Roll: ");
@@ -139,7 +168,7 @@ void printArduinoData() {
   print(", Pitch: ");
   print(p2Move.get("pitch"));
   print(", Heading: ");
-  println(p2Move.get("yaw"));
+  println(p2Move.get("heading"));
 }
 
 /* 
@@ -155,16 +184,16 @@ void serialEvent(Serial thisPort) {
     
   if (thisPort == portOne) {
     String[] list = split(inString, ':');
-    p1Move.put("pitch", (int)float(list[0]));
-    p1Move.put("roll", (int)float(list[1]));
-    p1Move.put("yaw", (int)float(list[2]));
+    p1Move.put("roll", (int)float(list[0]));
+    p1Move.put("pitch", (int)float(list[1]));
+    p1Move.put("heading", (int)float(list[2]));
   }
 
   if (thisPort == portTwo) {
     String[] list = split(inString, ':');
-    p2Move.put("pitch", (int)float(list[0]));
-    p2Move.put("roll", (int)float(list[1]));
-    p2Move.put("yaw", (int)float(list[2]));
+    p2Move.put("roll", (int)float(list[0]));
+    p2Move.put("pitch", (int)float(list[1]));
+    p2Move.put("heading", (int)float(list[2]));
   }
 }
      
