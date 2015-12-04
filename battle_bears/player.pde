@@ -1,18 +1,24 @@
-
+/*
+ * One of the players on the board.
+ */
 class Player {
   
   private PShape bearOutline;
   private PShape bearPoint;
-  
   private int score = 0;
   
+  /*
+   * Player class constructor
+   */
   Player() {
     bearOutline = loadShape("bear-outline.svg");
     bearPoint = loadShape("bear-point.svg");
   }
   
-  void display() {
-    
+  /*
+   * Display player contents
+   */
+  void draw() {
     // Draw bear outline and position it centered
     pushMatrix();
     shapeMode(CENTER);
@@ -23,21 +29,31 @@ class Player {
     _showScore();
   }
   
+  /*
+   * Added a point for this player
+   */
   int addPoint() {
     score++;
     return score;
   }
   
+  /*
+   * Reset the players score
+   */
   void resetScore() {
     score = 0;
   }
   
+  /*
+   * Get this players current score
+   */
   int getScore() {
     return score;
   }
   
-  // Show player points (if any)
-  //
+  /*
+   * Displays player points (if any)
+   */
   private void _showScore() {
     if (score <= 0) {
       return;

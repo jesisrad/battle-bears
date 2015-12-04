@@ -22,15 +22,6 @@ void loop() {
   // Use the simple AHRS function to get the current orientation.
   if (getOrientation(&orientation))
   {
-    /* 'orientation' should have valid .roll and .pitch fields */
-//    Serial.print(F("Orientation: "));
-//    Serial.print(orientation.roll);
-//    Serial.print(F(" "));
-//    Serial.print(orientation.pitch);
-//    Serial.print(F(" "));
-//    Serial.print(orientation.heading);
-//    Serial.println(F(""));
-
     Serial.print(orientation.roll);
     Serial.print(F(":"));
     Serial.print(orientation.pitch);
@@ -42,25 +33,11 @@ void loop() {
   delay(100);
 }
 
-// Compute orientation based on accelerometer and magnetometer data.
+/* 
+ * Compute orientation based on accelerometer and magnetometer data. 
+ */
 bool getOrientation(sensors_vec_t* orientation) {
 
-//  Serial.print(F("Acceleration: "));
-//  Serial.print(lsm.accelData.x);
-//  Serial.print(F(" "));
-//  Serial.print(lsm.accelData.y);
-//  Serial.print(F(" "));
-//  Serial.print(lsm.accelData.z);
-//  Serial.println(F(" "));
-//  
-//  Serial.print(F("Mag: "));
-//  Serial.print(lsm.magData.x);
-//  Serial.print(F(" "));
-//  Serial.print(lsm.magData.y);
-//  Serial.print(F(" "));
-//  Serial.print(lsm.magData.z);
-//  Serial.println(F(" "));
-  
   float const PI_F = 3.14159265F;
 
   // roll: Rotation around the X-axis. -180 <= roll <= 180                                          

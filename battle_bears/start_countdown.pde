@@ -1,27 +1,30 @@
 import com.dhchoi.CountdownTimer;
 import com.dhchoi.CountdownTimerService;
 
+/*
+ * Countdown display for the start of each game round.
+ */
 class StartCountdown {
   
-  PFont font;
+  private AniSequence seq;
+  private AniSequence rawrSeq;
   
-  CountdownTimer timer;
-  AniSequence seq;
-  AniSequence rawrSeq;
+  private PFont font;
   
-  String timeText = "";
+  private String timeText = "";
   
-  color timeTextColor = color(255, 255, 255);
+  private boolean isRawr;
   
-  boolean isRawr;
+  private int opacity = 0;
   
-  int opacity = 0;
+  private float startSize = 0.8;
+  private float size = startSize;
+  private float textOffsetX = 0;
+  private float textOffsetY = 0;
   
-  float startSize = 0.8;
-  float size = startSize;
-  float textOffsetX = 0;
-  float textOffsetY = 0;
-  
+  /*
+   * StartCountdown class constructor.
+   */
   StartCountdown(PApplet pApplet) {
     font = loadFont("Futura.vlw");
     textFont(font, 45);
@@ -36,7 +39,7 @@ class StartCountdown {
     seq.endStep();
     seq.beginStep();
     seq.add(Ani.to(this, 0.4, 0.3, "size", 1.5, Ani.QUAD_IN_OUT));
-    seq.add(Ani.to(this, 0.4, 0.3, "opacity", 0, Ani.QUAD_OUT, "onEnd:onSequenceEnd"));
+    seq.add(Ani.to(this, 0.4, 0.3, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
     seq.endStep();
     seq.endSequence();
     
@@ -46,16 +49,11 @@ class StartCountdown {
     rawrSeq.beginStep();
     rawrSeq.add(Ani.to(this, 0.3, "opacity", 255, Ani.QUAD_IN));
     rawrSeq.add(Ani.to(this, 0.7, "size", 1.5, Ani.QUAD_IN_OUT));
-    rawrSeq.add(Ani.to(this, 0.3, 0.4, "opacity", 0, Ani.QUAD_OUT, "onEnd:onSequenceEnd"));
+    rawrSeq.add(Ani.to(this, 0.3, 0.4, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
     rawrSeq.endStep();
     rawrSeq.endSequence();
   }
-  
-  void onSequenceEnd() {
-    size = startSize;
-    opacity = 0;
-  }
-  
+ 
   void draw() {
     int posX = 45;
     int posY = 45;
@@ -96,6 +94,14 @@ class StartCountdown {
     isRawr = true;
     timeText = "RAWR!";
     rawrSeq.start();
+  }
+  
+  /*
+   * Event handler for when an animation sequence has ended.
+   */
+  private void _onSequenceEnd() {
+    size = startSize;
+    opacity = 0;
   }
   
 }
