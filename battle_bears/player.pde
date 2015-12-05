@@ -5,18 +5,26 @@ class Player {
   
   private int _id;
   private String _name;
-  private PShape bearOutline;
-  private PShape bearPoint;
-  private int score = 0;
+  private PShape _bearOutline;
+  private PShape _bearPoint;
+  private int _score = 0;
+  private float _rotate = 0;
+  private color[] _palette;
+  private Ani rotateAni;
   
   /*
    * Player class constructor
    */
-  Player(int id, String name) {
+  Player(int id, String name, color[] palette) {
     _id = id;
     _name = name;
-    bearOutline = loadShape("bear-outline.svg");
-    bearPoint = loadShape("bear-point.svg");
+    _palette = palette;
+    _bearOutline = loadShape("bear-outline.svg");
+    _bearPoint = loadShape("bear-point.svg");
+    
+    rotateAni = new Ani(this, 0.05, "_rotate", 0.2, Ani.QUAD_OUT, "onEnd:_onAnimationEnd");
+    rotateAni.repeat(8);
+    rotateAni.setPlayMode(Ani.YOYO);
   }
   
   /*
@@ -26,8 +34,9 @@ class Player {
     // Draw bear outline and position it centered
     pushMatrix();
     shapeMode(CENTER);
-    translate(width / 2, height / 2 - bearOutline.height / 2 - 35);
-    shape(bearOutline, 0, 0);
+    translate(width / 2, height / 2 - _bearOutline.height / 2 - 35);
+    rotate(_rotate);
+    shape(_bearOutline, 0, 0);
     popMatrix();
     
     _showScore();
@@ -52,32 +61,57 @@ class Player {
   }
   
   /*
+   *
+   */
+  color[] getPalette() {
+    return _palette;
+  }
+  
+  /*
    * Added a point for this player
    */
   int addPoint() {
-    score++;
-    return score;
+    _score++;
+    return _score;
   }
   
   /*
    * Reset the to start of game setup
    */
   void reset() {
-    score = 0;
+    _score = 0;
   }
   
   /*
    * Get this players current score
    */
   int getScore() {
-    return score;
+    return _score;
+  }
+  
+  /*
+   * Animation displaying the player loss
+   */
+  void showHumiliation() {
+    rotateAni.start();
+  }
+  
+  /*
+   * Animation displaying the player win
+   */
+  void showCelebration() {
+    println("Player " + _id + " – " + _name + " Celebrates!");
+  }
+  
+  private void _onAnimationEnd() {
+    rotateAni.repeat(9);
   }
   
   /*
    * Displays player points (if any)
    */
   private void _showScore() {
-    if (score <= 0) {
+    if (_score <= 0) {
       return;
     }
     
@@ -86,9 +120,9 @@ class Player {
     scale(0.5);
     shapeMode(CORNER);
     
-    for (int i = 0; i < score; i++) {
-      shape(bearPoint, posX, 210);
-      posX += bearPoint.width + 25;
+    for (int i = 0; i < _score; i++) {
+      shape(_bearPoint, posX, 210);
+      posX += _bearPoint.width + 25;
     }
   }
   

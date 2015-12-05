@@ -32,29 +32,6 @@ HashMap<String, Integer> p2Move = new HashMap<String,Integer>();
 
 String[] moves = {"CLAWS OUT", "FISTA CUFFS", "POWER POSE"};
 
-// Colors
-
-// Big Brown
-color[] bigBrownPalette = {
-  color(128, 53, 147),
-  color(234, 9, 117),
-  color(237, 32, 36)
-};
-
-// Polar Paul
-color[] polarPaulPalette = {
-  color(30, 46, 87),
-  color(45, 111, 129),
-  color(64, 190, 180)
-};
-
-// Lil Goldie
-color[] lilGoldiePalette = {
-  color(250, 175, 100),
-  color(98, 201, 220),
-  color(199, 103, 168)
-};
-
 /*
  * Setup processing application
  */
@@ -73,8 +50,13 @@ void setup() {
   Ani.init(this);
   Ani.noAutostart();
   
-  player1 = new Player(1, "Big Brown");
-  player2 = new Player(2, "Polar Paul");
+  // Bear color palettes
+  color[] bigBrownPalette = { color(128, 53, 147), color(234, 9, 117), color(237, 32, 36) };
+  color[] polarPaulPalette = { color(30, 46, 87), color(45, 111, 129), color(64, 190, 180) };
+  //color[] lilGoldiePalette = { color(250, 175, 100), color(98, 201, 220), color(199, 103, 168) };
+  
+  player1 = new Player(1, "Big Brown", bigBrownPalette);
+  player2 = new Player(2, "Polar Paul", polarPaulPalette);
   
   startCountdown = new StartCountdown(this);
   
@@ -110,6 +92,8 @@ void draw() {
   
   player1Move = floor(random(-1, 3));
   player2Move = floor(random(-1, 3));
+  //player1Move = 3;
+  //player2Move = 3;
   
   //int move = getMove(p1Move.get("pitch"), p1Move.get("roll"));
   //if (move >= 0) {
@@ -209,7 +193,9 @@ void displayRoundResults() {
   Player bear = getRoundWinner();
   if (bear == null) {
     // No player won this round
-    println("No player won this round. It was a tie.");
+    startCountdown.animateText("DRAW");
+    player1.showHumiliation();
+    player2.showHumiliation();
   } else {
     int wins = bear.addPoint();
     
@@ -218,8 +204,15 @@ void displayRoundResults() {
       isGameOver = true;
       resetGameTimer.start();
     } else {
+      // Show losers humiliation
+      if (bear.getId() == 1) {
+        player2.showHumiliation();
+      } else {
+        player1.showHumiliation();
+      }
+      
       // Show winner's celebration
-      println("Player " + bear.getId() + " celebrates!");
+      bear.showCelebration();
     }
   }
 }

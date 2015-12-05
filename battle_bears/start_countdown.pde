@@ -8,6 +8,7 @@ class StartCountdown {
   
   private AniSequence seq;
   private AniSequence rawrSeq;
+  private AniSequence textSeq;
   
   private PFont font;
   
@@ -29,6 +30,20 @@ class StartCountdown {
     font = loadFont("Futura.vlw");
     textFont(font, 45);
     textAlign(CENTER);
+    
+    
+    // Animation sequence for any other text!
+    textSeq = new AniSequence(pApplet);
+    textSeq.beginSequence();
+    textSeq.beginStep();
+    textSeq.add(Ani.to(this, 0.3, "opacity", 255, Ani.QUAD_IN));
+    //textSeq.add(Ani.to(this, 0.3, "size", 1, Ani.QUAD_IN_OUT));
+    textSeq.endStep();
+    textSeq.beginStep();
+    //textSeq.add(Ani.to(this, 0.4, 0.3, "size", 1.5, Ani.QUAD_IN_OUT));
+    textSeq.add(Ani.to(this, 0.4, 1, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
+    textSeq.endStep();
+    textSeq.endSequence();
     
     // Animation sequence for the number countdown
     seq = new AniSequence(pApplet);
@@ -52,12 +67,13 @@ class StartCountdown {
     rawrSeq.add(Ani.to(this, 0.3, 0.4, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
     rawrSeq.endStep();
     rawrSeq.endSequence();
+    
   }
  
   void draw() {
     int posX = 45;
     int posY = 45;
-    
+    //println(opacity);
     fill(255, 255, 255, opacity);
     scale(size);
     
@@ -94,6 +110,18 @@ class StartCountdown {
     isRawr = true;
     timeText = "RAWR!";
     rawrSeq.start();
+  }
+  
+  /*
+   * Animate text
+   *
+   * @param String value Text to animate
+   */
+  void animateText(String value) {
+    isRawr = false;
+    timeText = value;
+    textSeq.start();
+    //seq.start();
   }
   
   /*
