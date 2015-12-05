@@ -14,8 +14,17 @@ Serial portTwo;
 Player player1;
 Player player2;
 
+int player1Move = -1;
+int player2Move = -1;
+
 StartCountdown startCountdown;
+
 CountdownTimer timer;
+CountdownTimer movesTimer;
+CountdownTimer resetGameTimer;
+
+Boolean captureMoves;
+Boolean isGameOver;
 
 // Hash map of all player moves that come from Arduino
 HashMap<String, Integer> p1Move = new HashMap<String,Integer>();
@@ -46,11 +55,6 @@ color[] lilGoldiePalette = {
   color(199, 103, 168)
 };
 
-
-// Fista Cuffs beats Power Pose 
-// Power Pose beats Claws Out 
-// Claws Out beats Fista Cuffs 
-
 /*
  * Setup processing application
  */
@@ -69,18 +73,14 @@ void setup() {
   Ani.init(this);
   Ani.noAutostart();
   
-  player1 = new Player();
-  player2 = new Player();
+  player1 = new Player(1, "Big Brown");
+  player2 = new Player(2, "Polar Paul");
   
   startCountdown = new StartCountdown(this);
   
-  player1.addPoint();
-  player1.addPoint();
-  player1.addPoint();
-  
-  player2.addPoint();
-  
   timer = CountdownTimerService.getNewCountdownTimer(this).configure(SECOND_IN_MILLIS, TOTAL_COUNTDOWN);
+  movesTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1000, 1000);
+  resetGameTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1000, 1000);
   
   // Run serial connection when ports hardware is connected
   setupSerialConnection();
@@ -108,12 +108,15 @@ void draw() {
   startCountdown.draw();
   popMatrix();
   
-  int move = getMove(p1Move.get("pitch"), p1Move.get("roll"));
-  if (move >= 0) {
-    println("PLAYER 1: " + moves[move]);
-  }
+  player1Move = floor(random(-1, 3));
+  player2Move = floor(random(-1, 3));
   
-  printArduinoData();
+  //int move = getMove(p1Move.get("pitch"), p1Move.get("roll"));
+  //if (move >= 0) {
+  //  println("PLAYER 1: " + moves[move]);
+  //}
+  
+  //printArduinoData();
 }
 
 void setupSerialConnection() {
@@ -149,6 +152,84 @@ int getMove(int pitch, int roll) {
   
   // No pose detected
   return -1;
+}
+
+/*
+ * Checks which player won
+ *
+ * Scenarios:
+ *   - Claws Out [0] beats Fista Cuffs [1]
+ *   - Fista Cuffs [1] beats Power Pose [2]
+ *   - Power Pose [2] beats Claws Out [0]
+ *   - Any valid move beats [0, 1, 2] beats an invalid move [-1]
+ *
+ * @return Player The player class that trumpt the other player
+ */
+Player getRoundWinner() {
+  println("\nPlayer 1 Move: " + player1Move + " | Player 2 Move: " + player2Move);
+  
+  if (player1Move == player2Move) {
+    // It's a tie!
+    return null;
+  }
+  
+  if (player1Move == -1) {
+    // Player 1 had an invalid move so loses by default
+    return player2;
+  }
+  
+  if (player2Move == -1) {
+    // Player 2 had an invalid move so loses by default
+    return player1;
+  }
+  
+  switch(player1Move) {
+    case 0:
+      if (player2Move == 1) {
+        return player1;
+      } 
+      return player2;
+    case 1:
+      if (player2Move == 2) {
+        return player1;
+      }
+      return player2;
+    default:
+      if (player2Move == 0) {
+        return player1;
+      }
+      return player2;
+  }
+}
+
+/*
+ * Display the result of a round.
+ */
+void displayRoundResults() {
+  Player bear = getRoundWinner();
+  if (bear == null) {
+    // No player won this round
+    println("No player won this round. It was a tie.");
+  } else {
+    int wins = bear.addPoint();
+    
+    if (wins >= 3) {
+      println("GAME OVER. Player " + bear.getId() + " wins!");
+      isGameOver = true;
+      resetGameTimer.start();
+    } else {
+      // Show winner's celebration
+      println("Player " + bear.getId() + " celebrates!");
+    }
+  }
+}
+
+/*
+ * Reset to a new game
+ */
+void resetGame() {
+  player1.reset();
+  player2.reset();
 }
 
 /*
@@ -201,22 +282,33 @@ void serialEvent(Serial thisPort) {
  * This is called once per second when the timer is running.
  */
 void onTickEvent(CountdownTimer t, long timeLeftUntilFinish) {
-  int currentTime = int((TOTAL_COUNTDOWN - timeLeftUntilFinish) / 1000);
-  startCountdown.updateTime(currentTime);
+  if (t == timer) {
+    int currentTime = int((TOTAL_COUNTDOWN - timeLeftUntilFinish) / 1000);
+    startCountdown.updateTime(currentTime);
+  }
 }
 
 /* 
  * This will be called after the timer finishes running
  */
 void onFinishEvent(CountdownTimer t) {
-  startCountdown.rawr();
+  if (t == timer) {
+    startCountdown.rawr();
+    captureMoves = true;
+    movesTimer.start();
+  } else if (t == movesTimer) {
+    displayRoundResults();
+    captureMoves = false;
+  } else if (t == resetGameTimer) {
+    resetGame(); 
+  }
 }
 
 /*
  * Event handler for when a keyboard key is pressed
  */
 void keyPressed() {
-  if ((key == ENTER) || (key == RETURN)) {
+  if ((key == ENTER) || (key == RETURN) && !isGameOver) {
    if (timer.isRunning()) {
      // Stop immediately as soon as button was clicked
      timer.stop(CountdownTimer.StopBehavior.STOP_IMMEDIATELY);

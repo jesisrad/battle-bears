@@ -62,8 +62,8 @@ class StartCountdown {
     scale(size);
     
     if (isRawr) {
-      textOffsetX += random(-2, 2);
-      textOffsetY += random(-2, 2);
+      textOffsetX += random(-1, 1);
+      textOffsetY += random(-1, 1);
     } else {
       textOffsetX = textOffsetY = 0;
     }

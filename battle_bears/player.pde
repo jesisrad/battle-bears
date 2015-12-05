@@ -3,6 +3,8 @@
  */
 class Player {
   
+  private int _id;
+  private String _name;
   private PShape bearOutline;
   private PShape bearPoint;
   private int score = 0;
@@ -10,7 +12,9 @@ class Player {
   /*
    * Player class constructor
    */
-  Player() {
+  Player(int id, String name) {
+    _id = id;
+    _name = name;
     bearOutline = loadShape("bear-outline.svg");
     bearPoint = loadShape("bear-point.svg");
   }
@@ -30,6 +34,24 @@ class Player {
   }
   
   /*
+   * Player id
+   *
+   * @returns int _id Player index
+   */
+  int getId() {
+    return _id; 
+  }
+  
+  /*
+   * Player name
+   *
+   * @return String _name Name of the player
+   */
+  String getName() {
+    return _name;
+  }
+  
+  /*
    * Added a point for this player
    */
   int addPoint() {
@@ -38,9 +60,9 @@ class Player {
   }
   
   /*
-   * Reset the players score
+   * Reset the to start of game setup
    */
-  void resetScore() {
+  void reset() {
     score = 0;
   }
   
