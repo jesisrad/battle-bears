@@ -6,6 +6,7 @@ import java.util.Map;
 
 final long SECOND_IN_MILLIS = 1000;
 final long TOTAL_COUNTDOWN = 4000;
+final int CELEBRATION_DELAY = 6;
 
 // Dual serial port code ref http://www.tigoe.com/pcomp/code/misc/167/
 Serial portOne;
@@ -17,14 +18,29 @@ Player player2;
 int player1Move = -1;
 int player2Move = -1;
 
+float gradientImagePosY = 0;
+float backgroundSize;
+
 StartCountdown startCountdown;
 
 CountdownTimer timer;
 CountdownTimer movesTimer;
 CountdownTimer resetGameTimer;
 
+Ani gradientAni;
+
+AniSequence backgroundSeq;
+
+color gradientColor1;
+color gradientColor2;
+
 Boolean captureMoves;
 Boolean isGameOver;
+
+PImage gradientImage;
+PImage gradientImage1;
+PImage gradientImage2;
+PImage gradientImage3;
 
 // Hash map of all player moves that come from Arduino
 HashMap<String, Integer> p1Move = new HashMap<String,Integer>();
@@ -37,6 +53,8 @@ String[] moves = {"CLAWS OUT", "FISTA CUFFS", "POWER POSE"};
  */
 void setup() {
   size(600, 600);
+  
+  backgroundSize = width;
   
   // Setting default move angles
   p1Move.put("pitch", 0);
@@ -51,12 +69,21 @@ void setup() {
   Ani.noAutostart();
   
   // Bear color palettes
-  color[] bigBrownPalette = { color(128, 53, 147), color(234, 9, 117), color(237, 32, 36) };
-  color[] polarPaulPalette = { color(30, 46, 87), color(45, 111, 129), color(64, 190, 180) };
+  color[] bigBrownPalette = { color(128, 53, 147), color(234, 9, 117) };
+  color[] polarPaulPalette = { color(30, 46, 87), color(45, 111, 129) };
   //color[] lilGoldiePalette = { color(250, 175, 100), color(98, 201, 220), color(199, 103, 168) };
   
   player1 = new Player(1, "Big Brown", bigBrownPalette);
   player2 = new Player(2, "Polar Paul", polarPaulPalette);
+  
+  backgroundSeq = new AniSequence(this);
+  backgroundSeq.add(new Ani(this, 0.45, "backgroundSize", width - 40, Ani.BACK_OUT));
+  backgroundSeq.add(new Ani(this, 0.45, CELEBRATION_DELAY, "backgroundSize", width, Ani.BACK_IN));
+  backgroundSeq.endSequence();
+  
+  gradientAni = new Ani(this, 1.5, "gradientImagePosY", -height * 2, Ani.LINEAR, "onEnd:onGradientAnimationEnd");
+  gradientAni.repeat();
+  gradientAni.start();
   
   startCountdown = new StartCountdown(this);
   
@@ -65,14 +92,46 @@ void setup() {
   resetGameTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1000, 1000);
   
   // Run serial connection when ports hardware is connected
-  setupSerialConnection();
+  //setupSerialConnection();
 }
 
 /*
  * Processing looping function
  */
 void draw() {
-  background(0);
+  background(125);
+  
+  if (gradientImage1 != null) { 
+    pushMatrix();
+    translate(width, gradientImagePosY);
+    rotate(PI / 2);
+    image(gradientImage1, 0, 0);
+    popMatrix();
+  }
+  
+  if (gradientImage2 != null) {
+    pushMatrix();
+    translate(width, gradientImagePosY + height);
+    rotate(PI / 2);
+    image(gradientImage2, 0, 0);
+    popMatrix();
+  }
+  
+  if (gradientImage3 != null) {
+    pushMatrix();
+    translate(width, gradientImagePosY + height * 2);
+    rotate(PI / 2);
+    image(gradientImage3, 0, 0);
+    popMatrix();
+  }
+  
+  pushMatrix();
+  fill(0);
+  noStroke();
+  rectMode(CENTER);
+  translate(width / 2, height / 2);
+  rect(0, 0, backgroundSize, backgroundSize);
+  popMatrix();
   
   pushMatrix();
   translate(0, height / 2);
@@ -114,6 +173,36 @@ void setupSerialConnection() {
   // Defer callback until new line  
   portOne.bufferUntil('\n');
   portTwo.bufferUntil('\n');
+}
+
+void createBackgroundGradient(Player bear) {
+  color[] palette1 = bear.getPalette();
+  color[] palette2 = reverse(palette1);
+  gradientImage1 = createGradientImage(width, height, palette1);
+  gradientImage2 = createGradientImage(width, height, palette2);
+  gradientImage3 = createGradientImage(width, height, palette1);  
+}
+
+PImage createGradientImage(int w, int h, color[] colors) {
+  PImage img = createImage(w, h, RGB);
+  int divideColors = colors.length - 1;
+  int stepSize = img.width / divideColors;
+  img.loadPixels();
+  
+  for (int x = 0; x < img.width; x++) {
+    color cS = colors[x / stepSize];
+    color cE = colors[min((x / stepSize) + 1, divideColors)];
+    float amt = (float) (x % stepSize) / stepSize;
+    color cC = lerpColor(cS, cE, amt);
+    
+    for (int y = 0; y < img.height; y++) {  
+      int index = x + y * img.width;
+      img.pixels[index] = cC;
+    }
+  }
+  
+  img.updatePixels();
+  return img;
 }
 
 /*
@@ -213,6 +302,8 @@ void displayRoundResults() {
       
       // Show winner's celebration
       bear.showCelebration();
+      createBackgroundGradient(bear);
+      backgroundSeq.start();
     }
   }
 }
@@ -298,10 +389,23 @@ void onFinishEvent(CountdownTimer t) {
 }
 
 /*
+ *
+ */
+void onGradientAnimationEnd() {
+  
+}
+
+/*
  * Event handler for when a keyboard key is pressed
  */
 void keyPressed() {
-  if ((key == ENTER) || (key == RETURN) && !isGameOver) {
+  if (key == 'j') {
+    gradientImagePosY = -height;
+  } else if (key == 'k') {
+    gradientImagePosY = 0;
+  }
+  
+  if ((key == ENTER) || (key == RETURN) && !isGameOver) { 
    if (timer.isRunning()) {
      // Stop immediately as soon as button was clicked
      timer.stop(CountdownTimer.StopBehavior.STOP_IMMEDIATELY);
