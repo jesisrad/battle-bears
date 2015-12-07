@@ -52,7 +52,9 @@ String[] moves = {"CLAWS OUT", "FISTA CUFFS", "POWER POSE"};
  * Setup processing application
  */
 void setup() {
-  size(600, 600);
+  //size(600, 600);
+  size(700, 700);
+  //fullScreen();
   
   backgroundSize = width;
   
@@ -69,21 +71,24 @@ void setup() {
   Ani.noAutostart();
   
   // Bear color palettes
-  color[] bigBrownPalette = { color(128, 53, 147), color(234, 9, 117) };
-  color[] polarPaulPalette = { color(30, 46, 87), color(45, 111, 129) };
+  //color[] bigBrownPalette = { color(128, 53, 147), color(234, 9, 117) };
+  //color[] polarPaulPalette = { color(30, 46, 87), color(45, 111, 129) };
   //color[] lilGoldiePalette = { color(250, 175, 100), color(98, 201, 220), color(199, 103, 168) };
+  
+  color[] bigBrownPalette = { color(128, 53, 147), color(234, 9, 117), color(237, 32, 36) };
+  //color[] polarPaulPalette = { color(30, 46, 87), color(45, 111, 129), color(64, 190, 180) };
+  color[] polarPaulPalette = { color(250, 175, 100), color(98, 201, 220), color(199, 103, 168) };
   
   player1 = new Player(1, "Big Brown", bigBrownPalette);
   player2 = new Player(2, "Polar Paul", polarPaulPalette);
   
   backgroundSeq = new AniSequence(this);
-  backgroundSeq.add(new Ani(this, 0.45, "backgroundSize", width - 40, Ani.BACK_OUT));
-  backgroundSeq.add(new Ani(this, 0.45, CELEBRATION_DELAY, "backgroundSize", width, Ani.BACK_IN));
+  backgroundSeq.add(new Ani(this, 0.45, "backgroundSize", width - 50, Ani.BACK_OUT));
+  backgroundSeq.add(new Ani(this, 0.45, CELEBRATION_DELAY, "backgroundSize", width, Ani.BACK_IN, "onEnd:onBackgroundSequenceEnd"));
   backgroundSeq.endSequence();
   
-  gradientAni = new Ani(this, 1.5, "gradientImagePosY", -height * 2, Ani.LINEAR, "onEnd:onGradientAnimationEnd");
+  gradientAni = new Ani(this, 2, "gradientImagePosY", -height * 2, Ani.LINEAR);
   gradientAni.repeat();
-  gradientAni.start();
   
   startCountdown = new StartCountdown(this);
   
@@ -99,7 +104,7 @@ void setup() {
  * Processing looping function
  */
 void draw() {
-  background(125);
+  background(0);
   
   if (gradientImage1 != null) { 
     pushMatrix();
@@ -303,6 +308,7 @@ void displayRoundResults() {
       // Show winner's celebration
       bear.showCelebration();
       createBackgroundGradient(bear);
+      gradientAni.start();
       backgroundSeq.start();
     }
   }
@@ -391,19 +397,14 @@ void onFinishEvent(CountdownTimer t) {
 /*
  *
  */
-void onGradientAnimationEnd() {
-  
+void onBackgroundSequenceEnd() {
+  gradientAni.pause();
 }
 
 /*
  * Event handler for when a keyboard key is pressed
  */
 void keyPressed() {
-  if (key == 'j') {
-    gradientImagePosY = -height;
-  } else if (key == 'k') {
-    gradientImagePosY = 0;
-  }
   
   if ((key == ENTER) || (key == RETURN) && !isGameOver) { 
    if (timer.isRunning()) {

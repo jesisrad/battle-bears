@@ -115,13 +115,13 @@ class Player {
       return;
     }
     
-    int posX = 80;
+    int posX = 200;
      
     scale(0.5);
     shapeMode(CORNER);
     
     for (int i = 0; i < _score; i++) {
-      shape(_bearPoint, posX, 210);
+      shape(_bearPoint, posX, 200);
       posX += _bearPoint.width + 25;
     }
   }

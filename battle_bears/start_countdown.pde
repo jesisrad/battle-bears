@@ -37,10 +37,8 @@ class StartCountdown {
     textSeq.beginSequence();
     textSeq.beginStep();
     textSeq.add(Ani.to(this, 0.3, "opacity", 255, Ani.QUAD_IN));
-    //textSeq.add(Ani.to(this, 0.3, "size", 1, Ani.QUAD_IN_OUT));
     textSeq.endStep();
     textSeq.beginStep();
-    //textSeq.add(Ani.to(this, 0.4, 0.3, "size", 1.5, Ani.QUAD_IN_OUT));
     textSeq.add(Ani.to(this, 0.4, 1, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
     textSeq.endStep();
     textSeq.endSequence();
@@ -53,8 +51,8 @@ class StartCountdown {
     seq.add(Ani.to(this, 0.3, "size", 1, Ani.QUAD_IN_OUT));
     seq.endStep();
     seq.beginStep();
-    seq.add(Ani.to(this, 0.4, 0.3, "size", 1.5, Ani.QUAD_IN_OUT));
-    seq.add(Ani.to(this, 0.4, 0.3, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
+    seq.add(Ani.to(this, 0.35, 0.3, "size", 1.5, Ani.QUAD_IN_OUT));
+    seq.add(Ani.to(this, 0.35, 0.3, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
     seq.endStep();
     seq.endSequence();
     
@@ -62,20 +60,18 @@ class StartCountdown {
     rawrSeq = new AniSequence(pApplet);
     rawrSeq.beginSequence();
     rawrSeq.beginStep();
-    rawrSeq.add(Ani.to(this, 0.3, "opacity", 255, Ani.QUAD_IN));
-    rawrSeq.add(Ani.to(this, 0.7, "size", 1.5, Ani.QUAD_IN_OUT));
-    rawrSeq.add(Ani.to(this, 0.3, 0.4, "opacity", 0, Ani.QUAD_OUT, "onEnd:_onSequenceEnd"));
+    rawrSeq.add(Ani.to(this, 0.3, "opacity", 255, Ani.QUAD_IN, "onStart:_onSequenceStart"));
+    rawrSeq.add(Ani.to(this, 0.7, "size", 1.5, Ani.QUAD_IN_OUT, "onEnd:_onSequenceEnd"));
+    rawrSeq.add(Ani.to(this, 0.3, 0.4, "opacity", 0, Ani.QUAD_OUT));
     rawrSeq.endStep();
     rawrSeq.endSequence();
-    
   }
  
   void draw() {
-    int posX = 45;
-    int posY = 45;
-    //println(opacity);
-    fill(255, 255, 255, opacity);
-    scale(size);
+    int posX = -200;
+    int posY = -245;
+    //fill(255, 255, 255, opacity);
+    //scale(size);
     
     if (isRawr) {
       textOffsetX += random(-1, 1);
@@ -86,12 +82,16 @@ class StartCountdown {
     
     pushMatrix();
     translate(posX, posY);
+    fill(255, 255, 255, opacity);
+    scale(size);
     text(timeText, textOffsetX, textOffsetY);
     popMatrix();
     
     pushMatrix();
     rotate(PI);
     translate(posX, posY);
+    fill(255, 255, 255, opacity);
+    scale(size);
     text(timeText, textOffsetX, textOffsetY);
     popMatrix();
   }
@@ -107,6 +107,12 @@ class StartCountdown {
   }
   
   void rawr() {
+    seq.pause();
+    textSeq.pause();
+    if (seq.isPlaying() || textSeq.isPlaying()) {
+     println("STILL RUNNING");  
+    }
+    
     isRawr = true;
     timeText = "RAWR!";
     rawrSeq.start();
@@ -121,9 +127,17 @@ class StartCountdown {
     isRawr = false;
     timeText = value;
     textSeq.start();
-    //seq.start();
   }
   
+  /*
+   * Event handler for when an animation sequence has started.
+   */
+  private void _onSequenceStart() {
+    size = startSize;
+    opacity = 0;
+    println("STARTING");
+  }
+    
   /*
    * Event handler for when an animation sequence has ended.
    */
