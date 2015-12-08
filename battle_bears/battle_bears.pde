@@ -14,6 +14,8 @@ Serial portTwo;
 
 Player player1;
 Player player2;
+Player roundWinner;
+Player roundLoser;
 
 int player1Move = -1;
 int player2Move = -1;
@@ -87,8 +89,8 @@ void setup() {
   backgroundSeq.add(new Ani(this, 0.45, CELEBRATION_DELAY, "backgroundSize", width, Ani.BACK_IN, "onEnd:onBackgroundSequenceEnd"));
   backgroundSeq.endSequence();
   
-  gradientAni = new Ani(this, 2, "gradientImagePosY", -height * 2, Ani.LINEAR);
-  gradientAni.repeat();
+  //gradientAni = new Ani(this, 2, "gradientImagePosY", -height * 2, Ani.LINEAR);
+  //gradientAni.repeat();
   
   startCountdown = new StartCountdown(this);
   
@@ -106,29 +108,34 @@ void setup() {
 void draw() {
   background(0);
   
-  if (gradientImage1 != null) { 
-    pushMatrix();
-    translate(width, gradientImagePosY);
-    rotate(PI / 2);
-    image(gradientImage1, 0, 0);
-    popMatrix();
-  }
+  //if (gradientImage1 != null) { 
+  // pushMatrix();
+  // translate(width, gradientImagePosY);
+  // rotate(PI / 2);
+  // image(gradientImage1, 0, 0);
+  // popMatrix();
+  //}
   
-  if (gradientImage2 != null) {
-    pushMatrix();
-    translate(width, gradientImagePosY + height);
-    rotate(PI / 2);
-    image(gradientImage2, 0, 0);
-    popMatrix();
-  }
+  //if (gradientImage2 != null) {
+  //  pushMatrix();
+  //  translate(width, gradientImagePosY + height);
+  //  rotate(PI / 2);
+  //  image(gradientImage2, 0, 0);
+  //  popMatrix();
+  //}
   
-  if (gradientImage3 != null) {
-    pushMatrix();
-    translate(width, gradientImagePosY + height * 2);
-    rotate(PI / 2);
-    image(gradientImage3, 0, 0);
-    popMatrix();
-  }
+  //if (gradientImage3 != null) {
+  //  pushMatrix();
+  //  translate(width, gradientImagePosY + height * 2);
+  //  rotate(PI / 2);
+  //  image(gradientImage3, 0, 0);
+  //  popMatrix();
+  //}
+  
+  //if (roundWinner != null) {
+  //  color[] winnerColors = roundWinner.getPalette();
+  //  setGradient(0, 0, width, height, winnerColors[0], winnerColors[1]);
+  //}
   
   pushMatrix();
   fill(0);
@@ -138,16 +145,30 @@ void draw() {
   rect(0, 0, backgroundSize, backgroundSize);
   popMatrix();
   
-  pushMatrix();
-  translate(0, height / 2);
-  player1.draw();
-  popMatrix();
-  
-  pushMatrix();
-  translate(width, height / 2);
-  rotate(PI);
-  player2.draw();
-  popMatrix();
+  // Layer the round winner above the loser so bubbles go over the loser
+  if (roundWinner != null && roundWinner == player1) {
+    pushMatrix();
+    translate(width, height / 2);
+    rotate(PI);
+    player2.draw();
+    popMatrix();
+    
+    pushMatrix();
+    translate(0, height / 2);
+    player1.draw();
+    popMatrix();
+  } else {
+    pushMatrix();
+    translate(0, height / 2);
+    player1.draw();
+    popMatrix();
+    
+    pushMatrix();
+    translate(width, height / 2);
+    rotate(PI);
+    player2.draw();
+    popMatrix();
+  }
   
   pushMatrix();
   translate(width / 2, height / 2);
@@ -180,35 +201,45 @@ void setupSerialConnection() {
   portTwo.bufferUntil('\n');
 }
 
-void createBackgroundGradient(Player bear) {
-  color[] palette1 = bear.getPalette();
-  color[] palette2 = reverse(palette1);
-  gradientImage1 = createGradientImage(width, height, palette1);
-  gradientImage2 = createGradientImage(width, height, palette2);
-  gradientImage3 = createGradientImage(width, height, palette1);  
-}
+//void createBackgroundGradient(Player bear) {
+//  color[] palette1 = bear.getPalette();
+//  color[] palette2 = reverse(palette1);
+//  gradientImage1 = createGradientImage(width, height, palette1);
+//  //gradientImage2 = createGradientImage(width, height, palette2);
+//  //gradientImage3 = createGradientImage(width, height, palette1);  
+//}
 
-PImage createGradientImage(int w, int h, color[] colors) {
-  PImage img = createImage(w, h, RGB);
-  int divideColors = colors.length - 1;
-  int stepSize = img.width / divideColors;
-  img.loadPixels();
+//void setGradient(int x, int y, float w, float h, color c1, color c2) {
+//  noFill();
+//  for (int i = x; i <= x + w; i++) {
+//    float inter = map(i, x, x+w, 0, 1);
+//    color c = lerpColor(c1, c2, inter);
+//    stroke(c);
+//    line(i, y, i, y + h);
+//  }
+//}
+
+//PImage createGradientImage(int w, int h, color[] colors) {
+//  PImage img = createImage(w, h, RGB);
+//  int divideColors = colors.length - 1;
+//  int stepSize = img.width / divideColors;
+//  img.loadPixels();
   
-  for (int x = 0; x < img.width; x++) {
-    color cS = colors[x / stepSize];
-    color cE = colors[min((x / stepSize) + 1, divideColors)];
-    float amt = (float) (x % stepSize) / stepSize;
-    color cC = lerpColor(cS, cE, amt);
+//  for (int x = 0; x < img.width; x++) {
+//    color cS = colors[x / stepSize];
+//    color cE = colors[min((x / stepSize) + 1, divideColors)];
+//    float amt = (float) (x % stepSize) / stepSize;
+//    color cC = lerpColor(cS, cE, amt);
     
-    for (int y = 0; y < img.height; y++) {  
-      int index = x + y * img.width;
-      img.pixels[index] = cC;
-    }
-  }
+//    for (int y = 0; y < img.height; y++) {  
+//      int index = x + y * img.width;
+//      img.pixels[index] = cC;
+//    }
+//  }
   
-  img.updatePixels();
-  return img;
-}
+//  img.updatePixels();
+//  return img;
+//}
 
 /*
  * Checks the incoming hand positions and decides on a pose
@@ -285,6 +316,8 @@ Player getRoundWinner() {
  */
 void displayRoundResults() {
   Player bear = getRoundWinner();
+  roundWinner = bear;
+  
   if (bear == null) {
     // No player won this round
     startCountdown.animateText("DRAW");
@@ -300,15 +333,17 @@ void displayRoundResults() {
     } else {
       // Show losers humiliation
       if (bear.getId() == 1) {
+        roundLoser = player2;
         player2.showHumiliation();
       } else {
+        roundLoser = player1;
         player1.showHumiliation();
       }
       
       // Show winner's celebration
       bear.showCelebration();
-      createBackgroundGradient(bear);
-      gradientAni.start();
+      //createBackgroundGradient(bear);
+      //gradientAni.start();
       backgroundSeq.start();
     }
   }
@@ -320,6 +355,15 @@ void displayRoundResults() {
 void resetGame() {
   player1.reset();
   player2.reset();
+  prepareForNextRound();
+}
+
+void prepareForNextRound() {
+  player1.hideCelebration();
+  player2.hideCelebration();
+  
+  player1.hideHumiliation();
+  player2.hideHumiliation();
 }
 
 /*
@@ -375,6 +419,7 @@ void onTickEvent(CountdownTimer t, long timeLeftUntilFinish) {
   if (t == timer) {
     int currentTime = int((TOTAL_COUNTDOWN - timeLeftUntilFinish) / 1000);
     startCountdown.updateTime(currentTime);
+    //println("Time: " + millis());
   }
 }
 
@@ -398,7 +443,7 @@ void onFinishEvent(CountdownTimer t) {
  *
  */
 void onBackgroundSequenceEnd() {
-  gradientAni.pause();
+  //gradientAni.pause();
 }
 
 /*
@@ -411,6 +456,7 @@ void keyPressed() {
      // Stop immediately as soon as button was clicked
      timer.stop(CountdownTimer.StopBehavior.STOP_IMMEDIATELY);
    } else {
+     prepareForNextRound();
      // Resume stopwatch
      timer.start();
    }
