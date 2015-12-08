@@ -3,6 +3,7 @@
  */
 class Player {
   
+  private ArrayList<Bubble> bubbles;
   private int _id;
   private String _name;
   private PShape _bearOutline;
@@ -10,7 +11,13 @@ class Player {
   private int _score = 0;
   private float _rotate = 0;
   private color[] _palette;
-  private Ani rotateAni;
+  
+  private Boolean _isCelebrating = false;
+  private Boolean _isHumiliating = false;
+  
+  private Ani rotateAni1;
+  private Ani rotateAni2;
+  private Ani rotateAni3;
   
   /*
    * Player class constructor
@@ -22,15 +29,36 @@ class Player {
     _bearOutline = loadShape("bear-outline.svg");
     _bearPoint = loadShape("bear-point.svg");
     
-    rotateAni = new Ani(this, 0.05, "_rotate", 0.2, Ani.QUAD_OUT, "onEnd:_onAnimationEnd");
-    rotateAni.repeat(8);
-    rotateAni.setPlayMode(Ani.YOYO);
+    //Bubbles stored in ArrayList.
+    bubbles = new ArrayList<Bubble>();
+    
+    float rotateTime = 0.3;
+    float rotate = 0.5;
+    //rotateAni1 = new Ani(this, rotateTime, 0.1, "_rotate", rotate, Ani.BACK_IN_OUT, "onEnd:_onRotate1End");
+    //rotateAni2 = new Ani(this, rotateTime, 0.1, "_rotate", -rotate, Ani.BACK_IN_OUT, "onEnd:_onRotate2End");
+    rotateAni1 = new Ani(this, rotateTime * .5, 0.1, "_rotate", rotate, Ani.QUAD_IN_OUT, "onEnd:_onRotate1End");
+    rotateAni2 = new Ani(this, rotateTime * .5, 0.1, "_rotate", -rotate, Ani.QUAD_IN_OUT, "onEnd:_onRotate2End");
+    rotateAni3 = new Ani(this, rotateTime, 0.1, "_rotate", 0, Ani.BACK_IN_OUT);
+    rotateAni3.pause();
   }
   
   /*
    * Display player contents
    */
   void draw() {
+    
+    pushMatrix();
+    shapeMode(CENTER);
+    translate(0, -420);
+    if (_isCelebrating) {
+     _drawBubbles();
+    } else {
+      _removeBubbles(); 
+    }
+    popMatrix();
+    
+    //_drawBubbles();
+    
     // Draw bear outline and position it centered
     pushMatrix();
     shapeMode(CENTER);
@@ -40,6 +68,44 @@ class Player {
     popMatrix();
     
     _showScore();
+  }
+  
+  private void _drawBubbles() {
+    for (Bubble b : bubbles) {
+      b.drawBubble(); //Draw the Bubble.
+      b.moveBubble(); //Move the Bubble.
+      b.update();     //Update the Bubble.
+    }
+    
+    //Iterate through all the bubbles in our ArrayList.
+    for (int i = 0; i < bubbles.size(); i++) {
+      Bubble b = bubbles.get(i); //Get every individual bubble and set it to 'b'.
+      if (b.dead) { //Is the bubble dead? (Is dead = true).
+        bubbles.remove(b); //Remove the bubble from the arrayList.
+      }
+    }
+   
+    // If the frameCount, which is how many frames have ticked over from the start
+    // of the sketch, add a new Bubble at a random location.
+    if ((frameCount % 1) == 0) {
+      bubbles.add(new Bubble(new PVector(int(random(width)), height), _id));
+    }
+  }
+  
+  private void _removeBubbles() {
+    for (Bubble b : bubbles) {
+      b.drawBubble(); //Draw the Bubble.
+      b.moveBubble(); //Move the Bubble.
+      b.update();     //Update the Bubble.
+    }
+    
+    //Iterate through all the bubbles in our ArrayList.
+    for (int i = 0; i < bubbles.size(); i++) {
+      Bubble b = bubbles.get(i); //Get every individual bubble and set it to 'b'.
+      if (b.dead) { //Is the bubble dead? (Is dead = true).
+        bubbles.remove(b); //Remove the bubble from the arrayList.
+      }
+    }
   }
   
   /*
@@ -93,18 +159,40 @@ class Player {
    * Animation displaying the player loss
    */
   void showHumiliation() {
-    rotateAni.start();
+    _isHumiliating = true;
+    rotateAni1.start();
+  }
+  
+  void hideHumiliation() {
+    _isHumiliating = false;
   }
   
   /*
    * Animation displaying the player win
    */
   void showCelebration() {
-    println("Player " + _id + " – " + _name + " Celebrates!");
+    _isCelebrating = true;
   }
   
-  private void _onAnimationEnd() {
-    rotateAni.repeat(9);
+  void hideCelebration() {
+    _isCelebrating = false; 
+  }
+  
+  private void _onRotate1End() {
+    if (_isHumiliating) {
+      rotateAni2.start(); 
+    } else {
+      rotateAni3.start(); 
+    }
+  }
+  
+  private void _onRotate2End() {
+    //rotateAni.repeat(9);
+    if (_isHumiliating) {
+      rotateAni1.start(); 
+    } else {
+      rotateAni3.start(); 
+    }
   }
   
   /*
