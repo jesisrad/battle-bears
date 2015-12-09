@@ -39,10 +39,10 @@ void loop() {
   // convert the voltage reading to inches
   // the first two numbers are the sensor values for straight (768) and bent (853)
   // the second two numbers are the degree
-   degrees = map(sensor, 768, 853, 0, 90);
+  degrees = map(sensor, 768, 853, 0, 90);
 
   Serial.print("analog input: ");
-  Serial.print(sensor,DEC);
+  Serial.print(sensor, DEC);
   Serial.print("   degrees: ");
   Serial.println(degrees,DEC);
   

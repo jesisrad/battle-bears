@@ -1,29 +1,31 @@
-import com.dhchoi.CountdownTimer;
-import com.dhchoi.CountdownTimerService;
+
 
 /*
  * Countdown display for the start of each game round.
  */
 class StartCountdown {
   
+  private final float START_SIZE = 0.8;
+  
   private AniSequence _countdownSeq;
   private AniSequence _rawrSeq;
   
   private Ani _rawrSizeAni;
-  private Ani rawrOpacityAni;
   
-  private PFont font;
+  private SoundFile _countdownSound;
+  private SoundFile _rawrSound;
   
-  private String timeText = "";
+  private PFont _font;
   
-  private boolean isRawr;
+  private String _timeText = "";
+  
+  private boolean _isRawr;
   
   private int _countdownOpacity = 0;
   private int _rawrOpacity = 0;
   
-  private float startSize = 0.8;
-  private float _countdownSize = startSize;
-  private float _rawrSize = startSize;
+  private float _countdownSize = START_SIZE;
+  private float _rawrSize = START_SIZE;
   private float _textOffsetX = 0;
   private float _textOffsetY = 0;
   
@@ -31,8 +33,8 @@ class StartCountdown {
    * StartCountdown class constructor.
    */
   StartCountdown(PApplet pApplet) {
-    font = loadFont("Futura-CondensedExtraBold-85.vlw");
-    textFont(font, 45);
+    _font = loadFont("Futura-CondensedExtraBold-85.vlw");
+    textFont(_font, 45);
     textAlign(CENTER);
     
     // Animation sequence for the number countdown
@@ -47,11 +49,14 @@ class StartCountdown {
     _countdownSeq.add(Ani.to(this, 0.3, 0.3, "_countdownOpacity", 0, Ani.QUAD_OUT, "onEnd:_onCountdownSequenceEnd"));
     _countdownSeq.endStep();
     _countdownSeq.endSequence();
+    
+    //_countdownSound = new SoundFile(pApplet, "sound-effects/countdown.mp3");
+    _rawrSound = new SoundFile(pApplet, "sound-effects/rawr.mp3");
   }
  
   void draw() {
     
-    if (isRawr) {
+    if (_isRawr) {
       int delta = 2;
       _textOffsetX += random(-delta, delta);
       _textOffsetY += random(-delta, delta);
@@ -59,7 +64,7 @@ class StartCountdown {
       _textOffsetX = _textOffsetY = 0;
     }
     
-    displayText(timeText, _countdownOpacity, _countdownSize);
+    displayText(_timeText, _countdownOpacity, _countdownSize);
     displayText("RAWR!", _rawrOpacity, _rawrSize);
   }
   
@@ -88,13 +93,18 @@ class StartCountdown {
   }
   
   void updateTime(int seconds) {
-    isRawr = false;
-    timeText = seconds == 0 ? "" : nf(seconds, 1);
+    _isRawr = false;
+    _timeText = seconds == 0 ? "" : nf(seconds, 1);
     _countdownSeq.start();
+    
+    // Play countdown sound
+    //_countdownSound.stop();
+    //_countdownSound = new SoundFile(pApplet, "sound-effects/countdown.mp3");
+    //_countdownSound.play();
   }
   
   void rawr() {
-    isRawr = true;
+    _isRawr = true;
     
     // Animation sequence for the RAWR!
     _rawrSeq = new AniSequence(pApplet);
@@ -110,13 +120,15 @@ class StartCountdown {
     
     _rawrSizeAni = new Ani(this, 0.7, "_rawrSize", 1.5, Ani.QUAD_IN_OUT);
     _rawrSizeAni.start();
+    
+    //_rawrSound.play();
   }
     
   /*
    * Event handler for when an animation sequence has ended.
    */
   private void _onCountdownSequenceEnd() {
-    _countdownSize = startSize;
+    _countdownSize = START_SIZE;
     _countdownOpacity = 0;
     _countdownSeq.pause();
   } 
@@ -125,8 +137,7 @@ class StartCountdown {
    * Event handler for when an animation sequence has ended.
    */
   private void _onRawrEnd() {
-    //_rawrSeq.pause();
-    _rawrSize = startSize;
+    _rawrSize = START_SIZE;
     _rawrOpacity = 0;
   }
   
