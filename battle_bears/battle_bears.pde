@@ -1,10 +1,11 @@
+import processing.sound.*;
 import processing.serial.*;
 import com.dhchoi.CountdownTimer;
 import com.dhchoi.CountdownTimerService;
 import de.looksgood.ani.*;
 import java.util.Map;
 
-final String[] MOVES = {"CLAWS OUT!", "FISTA CUFFS!", "POWER POSE!"};
+final String[] MOVES = {"CLAWS OUT, PAWS OUT!", "FISTA CUFFS!", "POWER POSE!"};
 
 final long SECOND_IN_MILLIS = 1000;
 final long TOTAL_COUNTDOWN = 4000;
@@ -17,7 +18,6 @@ Player player1;
 Player player2;
 Player roundWinner;
 Player roundLoser;
-Player gameWinner;
 
 int player1Move = -1;
 int player2Move = -1;
@@ -29,7 +29,8 @@ StartCountdown startCountdown;
 
 CountdownTimer timer;
 CountdownTimer movesTimer;
-CountdownTimer humiliationTimer;
+CountdownTimer humiliationStartTimer;
+CountdownTimer humiliationEndTimer;
 //CountdownTimer resetGameTimer;
 
 Ani gradientAni;
@@ -38,13 +39,15 @@ Ani hideGradientAni;
 
 AniSequence backgroundSeq;
 
+SoundFile gameOverSound;
+SoundFile voiceOverSound;
+
 color gradientColor1;
 color gradientColor2;
 
 Boolean captureMoves = false;
 Boolean isGameOver = false;
 
-PImage gradientImage;
 PImage gradientImage1;
 PImage gradientImage2;
 PImage gradientImage3;
@@ -82,8 +85,19 @@ void setup() {
   color[] polarPaulPalette = { color(250, 175, 100), color(98, 201, 220), color(199, 103, 168) };
   //color[] lilGoldiePalette = { color(250, 175, 100), color(98, 201, 220), color(199, 103, 168) };
   
-  player1 = new Player(1, "Big Brown", bigBrownPalette);
-  player2 = new Player(2, "Polar Paul", polarPaulPalette);
+  String[][] bigBrownVoices = {
+    { "claws-out-paws-out-mike-1.mp3", "claws-out-paws-out-mike-2.mp3" },
+    { "fista-cuffs-mike-1.mp3", "fista-cuffs-mike-2.mp3" },
+    { "power-pose-mike-1.mp3", "power-pose-mike-2.mp3" }
+  };
+  String[][] polarPaulVoices = {
+    { "claws-out-paws-out-tammie-1.mp3", "claws-out-paws-out-tammie-2.mp3" },
+    { "fista-cuffs-tammie-1.mp3", "fista-cuffs-tammie-2.mp3" },
+    { "power-pose-tammie-1.mp3", "power-pose-tammie-2.mp3", "power-pose-tammie-3.mp3" }
+  };
+  
+  player1 = new Player(1, "Big Brown", bigBrownPalette, bigBrownVoices);
+  player2 = new Player(2, "Polar Paul", polarPaulPalette, polarPaulVoices);
   
   revealGradientAni = new Ani(this, 0.45, "backgroundSize", width - 40, Ani.BACK_IN_OUT);
   
@@ -95,12 +109,15 @@ void setup() {
   timer = CountdownTimerService.getNewCountdownTimer(this).configure(SECOND_IN_MILLIS, TOTAL_COUNTDOWN);
   movesTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1000, 1000);
   //resetGameTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1000, 1000);
-  humiliationTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1000, 1000);
+  humiliationStartTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1500, 1500);
+  humiliationEndTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1500, 1500);
   
-  player1.addPoint();
-  player1.addPoint();
-  player2.addPoint();
-  player2.addPoint();
+  //player1.addPoint();
+  //player1.addPoint();
+  //player2.addPoint();
+  //player2.addPoint();
+  
+  gameOverSound = new SoundFile(pApplet, "sound-effects/winner-celebration.wav");
   
   // Run serial connection when ports hardware is connected
   //setupSerialConnection();
@@ -298,18 +315,20 @@ void displayRoundResults() {
     player2.showNotification("DRAW!");
   } else {
     roundWinner = bear;
+    int winnerMove;
   
     if (bear.getId() == 1) {
       roundLoser = player2;
+      winnerMove = player1Move;
     } else {
       roundLoser = player1;
+      winnerMove = player2Move;
     }
     
     if (bear.addPoint() >= 3) {
       // Game over
       isGameOver = true;
       
-      gameWinner = bear;
       createBackgroundGradient(bear);
       
       roundWinner.showNotification("WINNER!");
@@ -318,13 +337,15 @@ void displayRoundResults() {
       
       revealGradientAni.start();
       gradientAni.start();
+      
+      gameOverSound.loop();
+      //gameOverSound.play();
     } else {
       // End of a round
       
       // Show losers humiliation
       //roundLoser.showHumiliation();
-      humiliationTimer.start();
-      
+      humiliationStartTimer.start();
       
       // Show winner's celebration
       roundWinner.showCelebration();
@@ -332,6 +353,9 @@ void displayRoundResults() {
       // Display each player's move
       player1.showNotification(getMoveName(player1Move));
       player2.showNotification(getMoveName(player2Move));
+      
+      voiceOverSound = new SoundFile(this, "voice-overs/" + roundWinner.getVoiceOver(winnerMove));
+      voiceOverSound.play();
     }
   }
 }
@@ -344,7 +368,6 @@ String getMoveName(int move) {
  * Reset to a new game
  */
 void resetGame() {
-  isGameOver = false;
   player1.reset();
   player2.reset();
   prepareForNextRound();
@@ -352,17 +375,30 @@ void resetGame() {
   gradientAni.pause();
   hideGradientAni = new Ani(this, 0.45, "backgroundSize", width, Ani.BACK_IN_OUT, "onEnd:onHideGradientEnd");
   hideGradientAni.start();
+  
+  isGameOver = false;
 }
 
 void prepareForNextRound() {
   player1.hideCelebration();
   player2.hideCelebration();
   
-  player1.hideHumiliation();
-  player2.hideHumiliation();
+  if (roundLoser != null && !isGameOver) {
+    // Hide humiliation
+    humiliationEndTimer.start();
+  } else {
+    player1.hideHumiliation();
+    player2.hideHumiliation();
+  }
   
   player1.hideNotification();
   player2.hideNotification();
+  
+  gameOverSound.cue(0);
+  gameOverSound.stop();
+  
+  roundLoser = null;
+  roundWinner = null;
 }
 
 /*
@@ -433,8 +469,11 @@ void onFinishEvent(CountdownTimer t) {
   } else if (t == movesTimer) {
     displayRoundResults();
     captureMoves = false;
-  } else if (t == humiliationTimer) {
-    roundLoser.showHumiliation(); 
+  } else if (t == humiliationStartTimer) {
+    roundLoser.showHumiliation();
+  } else if (t == humiliationEndTimer) {
+    player1.hideHumiliation();
+    player2.hideHumiliation();
   }
   //else if (t == resetGameTimer) {
   //  resetGame(); 

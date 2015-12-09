@@ -27,20 +27,19 @@ class Player {
   
   private color[] _palette;
   
+  private String[][] _voices;
+  
   private Boolean _isCelebrating = false;
   private Boolean _isHumiliating = false;
   
   private Ani _rotateAni;
-  private Ani _rotateAni1;
-  private Ani _rotateAni2;
-  private Ani _rotateAni3;
   
   private AniSequence _notificationSeq;
   
   /*
    * Player class constructor
    */
-  Player(int id, String name, color[] palette) {
+  Player(int id, String name, color[] palette, String[][] voices) {
     _font = loadFont("Futura-CondensedExtraBold-85.vlw");
     textFont(_font, 45);
     textAlign(CENTER);
@@ -48,17 +47,12 @@ class Player {
     _id = id;
     _name = name;
     _palette = palette;
+    _voices = voices;
     _bearOutline = loadShape("bear-outline.svg");
     _bearPoint = loadShape("bear-point.svg");
     
     //Bubbles stored in ArrayList.
     _bubbles = new ArrayList<Bubble>();
-    
-    
-    //_rotateAni1 = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", HUMILIATION_ROTATE_VALUE, Ani.BACK_IN_OUT, "onEnd:_onRotate1End");
-    //_rotateAni2 = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", -HUMILIATION_ROTATE_VALUE, Ani.BACK_IN_OUT, "onEnd:_onRotate2End");
-    //_rotateAni1 = new Ani(this, HUMILIATION_ROTATE_TIME * .5, 0.1, "_rotate", HUMILIATION_ROTATE_VALUE, Ani.QUAD_IN_OUT, "onEnd:_onRotate1End");
-    //_rotateAni2 = new Ani(this, HUMILIATION_ROTATE_TIME * .5, 0.1, "_rotate", -HUMILIATION_ROTATE_VALUE, Ani.QUAD_IN_OUT, "onEnd:_onRotate2End");
   }
   
   /*
@@ -142,18 +136,26 @@ class Player {
     return _score;
   }
   
+  String getVoiceOver(int move) {
+    String[] voices = _voices[move];
+    return voices[floor(random(0, voices.length))]; 
+  }
+  
   /*
    * Animation displaying the player loss
    */
   void showHumiliation() {
     _isHumiliating = true;
-    //_rotateAni1.start();
     _rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME * .5, 0.1, "_rotate", HUMILIATION_ROTATE_VALUE, Ani.QUAD_IN_OUT, "onEnd:_onRotateEnd");
     _rotateAni.start();
   }
   
   void hideHumiliation() {
     _isHumiliating = false;
+  }
+  
+  Boolean isHumiliating() {
+    return _isHumiliating;
   }
   
   /*
@@ -250,24 +252,6 @@ class Player {
     }
     _rotateAni.start();
   }
-  
-  //private void _onRotate1End() {
-  //  if (_isHumiliating) {
-  //    _rotateAni2.start(); 
-  //  } else {
-  //    _rotateAni3 = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", 0, Ani.BACK_IN_OUT);
-  //    _rotateAni3.start(); 
-  //  }
-  //}
-  
-  //private void _onRotate2End() {
-  //  if (_isHumiliating) {
-  //    _rotateAni1.start(); 
-  //  } else {
-  //    _rotateAni3 = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", 0, Ani.BACK_IN_OUT);
-  //    _rotateAni3.start(); 
-  //  }
-  //}
   
   /*
    * Displays player points (if any)
