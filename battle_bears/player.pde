@@ -3,6 +3,8 @@
  * One of the players on the board.
  */
 class Player {
+  private final float GAME_OVER_ROTATE_TIME = 0.365;
+  private final float GAME_OVER_ROTATE_VALUE = 0.6;
   private final float HUMILIATION_ROTATE_TIME = 0.3;
   private final float HUMILIATION_ROTATE_VALUE = 0.5;
   
@@ -23,6 +25,7 @@ class Player {
   private final float NOTIFICATION_START_SCALE = 0.4;
   
   private float _rotate = 0;
+  private float _rotateTime = HUMILIATION_ROTATE_TIME;
   private float _notificationScale = NOTIFICATION_START_SCALE;
   
   private color[] _palette;
@@ -146,6 +149,7 @@ class Player {
    */
   void showHumiliation() {
     _isHumiliating = true;
+    _rotateTime = HUMILIATION_ROTATE_TIME;
     _rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME * .5, 0.1, "_rotate", HUMILIATION_ROTATE_VALUE, Ani.QUAD_IN_OUT, "onEnd:_onRotateEnd");
     _rotateAni.start();
   }
@@ -156,6 +160,17 @@ class Player {
   
   Boolean isHumiliating() {
     return _isHumiliating;
+  }
+  
+  void showGameOverCelebration() {
+    _rotateTime = GAME_OVER_ROTATE_TIME;
+    _rotateAni = new Ani(this, GAME_OVER_ROTATE_TIME * .5, 0.1, "_rotate", HUMILIATION_ROTATE_VALUE, Ani.QUAD_IN_OUT, "onEnd:_onRotateCelebrateEnd");
+    _rotateAni.start();
+    _isHumiliating = true;
+  }
+  
+  void hideGameOverCelebration() {
+    _isHumiliating = false; 
   }
   
   /*
@@ -242,13 +257,24 @@ class Player {
     }
   }
   
+  private void _onRotateCelebrateEnd() {
+    if (_isHumiliating) {
+      float rotateDest = (_rotate < 0) ? GAME_OVER_ROTATE_VALUE : -GAME_OVER_ROTATE_VALUE;
+      _rotateAni = new Ani(this, GAME_OVER_ROTATE_TIME, 0.1, "_rotate", rotateDest, Ani.BACK_IN_OUT, "onEnd:_onRotateCelebrateEnd");
+      //_rotateAni = new Ani(this, _rotateTime * .5, 0.1, "_rotate", rotateDest, Ani.QUAD_IN_OUT, "onEnd:_onRotateCelebrateEnd");
+    } else {
+      _rotateAni = new Ani(this, GAME_OVER_ROTATE_TIME, 0.1, "_rotate", 0, Ani.BACK_IN_OUT); 
+    }
+    _rotateAni.start();
+  }
+  
   private void _onRotateEnd() {
     if (_isHumiliating) {
       float rotateDest = (_rotate < 0) ? HUMILIATION_ROTATE_VALUE : -HUMILIATION_ROTATE_VALUE;
       //_rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", rotateDest, Ani.BACK_IN_OUT, "onEnd:_onRotate1End");
-      _rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME * .5, 0.1, "_rotate", rotateDest, Ani.QUAD_IN_OUT, "onEnd:_onRotateEnd");
+      _rotateAni = new Ani(this, _rotateTime * .5, 0.1, "_rotate", rotateDest, Ani.QUAD_IN_OUT, "onEnd:_onRotateEnd");
     } else {
-      _rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", 0, Ani.BACK_IN_OUT); 
+      _rotateAni = new Ani(this, _rotateTime, 0.1, "_rotate", 0, Ani.BACK_IN_OUT); 
     }
     _rotateAni.start();
   }

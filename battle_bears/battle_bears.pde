@@ -90,14 +90,14 @@ void setup() {
   //color[] lilGoldiePalette = { color(250, 175, 100), color(98, 201, 220), color(199, 103, 168) };
   
   String[][] bigBrownVoices = {
-    { "claws-out-paws-out-mike-1.mp3", "claws-out-paws-out-mike-2.mp3" },
-    { "fista-cuffs-mike-1.mp3", "fista-cuffs-mike-2.mp3" },
-    { "power-pose-mike-1.mp3", "power-pose-mike-2.mp3" }
+    { "claws-out-paws-out-mike-1_converted.mp3", "claws-out-paws-out-mike-2_converted.mp3" },
+    { "fista-cuffs-mike-1_converted.mp3", "fista-cuffs-mike-2_converted.mp3" },
+    { "power-pose-mike-1_converted.mp3", "power-pose-mike-2_converted.mp3" }
   };
   String[][] polarPaulVoices = {
-    { "claws-out-paws-out-tammie-1.mp3", "claws-out-paws-out-tammie-2.mp3" },
-    { "fista-cuffs-tammie-1.mp3", "fista-cuffs-tammie-2.mp3" },
-    { "power-pose-tammie-1.mp3", "power-pose-tammie-2.mp3", "power-pose-tammie-3.mp3" }
+    { "claws-out-paws-out-tammie-1_converted.mp3", "claws-out-paws-out-tammie-2_converted.mp3" },
+    { "fista-cuffs-tammie-1_converted.mp3", "fista-cuffs-tammie-2_converted.mp3" },
+    { "power-pose-tammie-1_converted.mp3", "power-pose-tammie-2_converted.mp3", "power-pose-tammie-3_converted.mp3" }
   };
   
   player1 = new Player(1, "Big Brown", bigBrownPalette, bigBrownVoices);
@@ -116,15 +116,15 @@ void setup() {
   humiliationStartTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1500, 1500);
   humiliationEndTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1500, 1500);
   
-  //player1.addPoint();
-  //player1.addPoint();
-  //player2.addPoint();
-  //player2.addPoint();
+  player1.addPoint();
+  player1.addPoint();
+  player2.addPoint();
+  player2.addPoint();
   
-  gameOverSound = new SoundFile(pApplet, "sound-effects/winner-celebration.wav");
+  gameOverSound = new SoundFile(pApplet, "sound-effects/winner-celebration.mp3");
   
   // Run serial connection when ports hardware is connected
-  setupSerialConnection();
+  //setupSerialConnection();
 }
 
 /*
@@ -178,20 +178,20 @@ void draw() {
   startCountdown.draw();
   popMatrix();
   
-  //player1Move = floor(random(-1, 3));
-  //player2Move = floor(random(-1, 3));
+  player1Move = floor(random(-1, 3));
+  player2Move = floor(random(-1, 3));
   //player1Move = 3;
   //player2Move = 3;
   
-  if (captureMoves) {
-   player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
-   player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
-  }
-  //player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
-  //player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
+  //if (captureMoves) {
+  // player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
+  // player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
+  //}
+  ////player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
+  ////player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
   
-  printMove();
-  printArduinoData();
+  //printMove();
+  //printArduinoData();
 }
 
 void setupSerialConnection() {
@@ -328,6 +328,9 @@ void displayRoundResults() {
     
     player1.showNotification("DRAW!");
     player2.showNotification("DRAW!");
+    
+    //voiceOverSound = new SoundFile(this, "sound-effects/draw.mp3");
+    //voiceOverSound.play();
   } else {
     roundWinner = bear;
     int winnerMove;
@@ -347,8 +350,10 @@ void displayRoundResults() {
       createBackgroundGradient(bear);
       
       roundWinner.showNotification("WINNER!");
+      roundWinner.showGameOverCelebration();
+      
       roundLoser.showNotification("LOSER!");
-      roundLoser.showHumiliation();
+      //roundLoser.showHumiliation();
       
       revealGradientAni.start();
       gradientAni.start();
@@ -397,6 +402,8 @@ void resetGame() {
 void prepareForNextRound() {
   player1.hideCelebration();
   player2.hideCelebration();
+  player1.hideGameOverCelebration();
+  player2.hideGameOverCelebration();
   
   if (roundLoser != null && !isGameOver) {
     // Hide humiliation
@@ -532,6 +539,96 @@ void onHideGradientEnd() {
  * Event handler for when a keyboard key is pressed
  */
 void keyPressed() {
+  //switch (key) {
+  //  case '1':
+  //    //bad
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-mike-1.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-mike-1_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '2':
+  //    // bad
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-mike-2.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-mike-2_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '3':
+  //    // bad
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-tammie-1.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-tammie-1_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '4':
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-tammie-2.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/claws-out-paws-out-tammie-2_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '5':
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-mike-1.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-mike-1_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '6':
+  //    //bad
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-mike-2.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-mike-2_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '7':
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-tammie-1.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-tammie-1_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '8':
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-tammie-2.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/fista-cuffs-tammie-2_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case '9':
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/power-pose-mike-1.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/power-pose-mike-1_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case 'a':
+  //    //bad
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/power-pose-mike-2.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/power-pose-mike-2_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case 's':
+  //    //bad
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/power-pose-tammie-1.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/power-pose-tammie-1_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case 'd':
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/power-pose-tammie-2.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/power-pose-tammie-2_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case 'f':
+  //    //bad
+  //    //voiceOverSound = new SoundFile(this, "voice-overs/power-pose-tammie-3.mp3");
+  //    voiceOverSound = new SoundFile(this, "voice-overs/power-pose-tammie-3_converted.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case 'g':
+  //    //bad
+  //    voiceOverSound = new SoundFile(this, "sound-effects/winner-celebration.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case 'h':
+  //    //bad
+  //    voiceOverSound = new SoundFile(this, "sound-effects/countdown.mp3");
+  //    voiceOverSound.play();
+  //    break;
+  //  case 'j':
+  //    voiceOverSound = new SoundFile(this, "sound-effects/countdown.mp3");
+  //    voiceOverSound.rate(1.1);
+  //    voiceOverSound.play();
+  //    break;
+  //}
+  
   
   if ((key == ENTER) || (key == RETURN) && !isGameOver) { 
    if (timer.isRunning()) {

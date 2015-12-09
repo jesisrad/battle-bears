@@ -50,8 +50,11 @@ class StartCountdown {
     _countdownSeq.endStep();
     _countdownSeq.endSequence();
     
-    //_countdownSound = new SoundFile(pApplet, "sound-effects/countdown.mp3");
+    _countdownSound = new SoundFile(pApplet, "sound-effects/countdown.mp3");
+    _countdownSound.rate(1.1);
+    
     _rawrSound = new SoundFile(pApplet, "sound-effects/rawr.mp3");
+    _rawrSound.rate(1);
   }
  
   void draw() {
@@ -100,7 +103,7 @@ class StartCountdown {
     // Play countdown sound
     //_countdownSound.stop();
     //_countdownSound = new SoundFile(pApplet, "sound-effects/countdown.mp3");
-    //_countdownSound.play();
+    _countdownSound.play();
   }
   
   void rawr() {
@@ -121,7 +124,7 @@ class StartCountdown {
     _rawrSizeAni = new Ani(this, 0.7, "_rawrSize", 1.5, Ani.QUAD_IN_OUT);
     _rawrSizeAni.start();
     
-    //_rawrSound.play();
+    _rawrSound.play();
   }
     
   /*
