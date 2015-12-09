@@ -27,23 +27,23 @@ void loop() {
     Serial.print(orientation.pitch);
     Serial.print(F(":"));
     Serial.print(orientation.heading);
-    Serial.println(F(""));
+    Serial.print(F(":"));
   }
 
-    // added for bend sensor 
+  // Added for bend sensor 
   int sensor, degrees;
 
-  // read the voltage from the voltage divider (sensor plus resistor)
+  // Read the voltage from the voltage divider (sensor plus resistor)
   sensor = analogRead(A9);
 
-  // convert the voltage reading to inches
-  // the first two numbers are the sensor values for straight (768) and bent (853)
+  // Convert the voltage reading to inches
+  // The first two numbers are the sensor values for straight (768) and bent (853)
   // the second two numbers are the degree
   degrees = map(sensor, 768, 853, 0, 90);
 
-  Serial.print("analog input: ");
+  //  Serial.print("analog input: ");
   Serial.print(sensor, DEC);
-  Serial.print("   degrees: ");
+  Serial.print(F(":"));
   Serial.println(degrees,DEC);
   
   delay(100);

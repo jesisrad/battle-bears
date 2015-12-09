@@ -5,7 +5,7 @@ import com.dhchoi.CountdownTimerService;
 import de.looksgood.ani.*;
 import java.util.Map;
 
-final String[] MOVES = {"CLAWS OUT, PAWS OUT!", "FISTA CUFFS!", "POWER POSE!"};
+final String[] MOVES = {"CLAWS OUT!", "FISTA CUFFS!", "POWER POSE!"};
 
 final long SECOND_IN_MILLIS = 1000;
 final long TOTAL_COUNTDOWN = 4000;
@@ -71,10 +71,14 @@ void setup() {
   p1Move.put("pitch", 0);
   p1Move.put("roll", 0);
   p1Move.put("heading", 0);
+  p1Move.put("bendInput", 0);
+  p1Move.put("bendAngle", 0);
   
   p2Move.put("pitch", 0);
   p2Move.put("roll", 0);
   p2Move.put("heading", 0);
+  p2Move.put("bendInput", 0);
+  p2Move.put("bendAngle", 0);
   
   Ani.init(this);
   Ani.noAutostart();
@@ -120,7 +124,7 @@ void setup() {
   gameOverSound = new SoundFile(pApplet, "sound-effects/winner-celebration.wav");
   
   // Run serial connection when ports hardware is connected
-  //setupSerialConnection();
+  setupSerialConnection();
 }
 
 /*
@@ -174,12 +178,20 @@ void draw() {
   startCountdown.draw();
   popMatrix();
   
-  player1Move = floor(random(-1, 3));
-  player2Move = floor(random(-1, 3));
+  //player1Move = floor(random(-1, 3));
+  //player2Move = floor(random(-1, 3));
   //player1Move = 3;
   //player2Move = 3;
   
-  //printArduinoData();
+  if (captureMoves) {
+   player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
+   player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
+  }
+  //player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
+  //player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
+  
+  printMove();
+  printArduinoData();
 }
 
 void setupSerialConnection() {
@@ -233,17 +245,20 @@ PImage createGradientImage(int w, int h, color[] colors) {
 /*
  * Checks the incoming hand positions and decides on a pose
  */
-int getMove(int pitch, int roll) {
+int getMove(int pitch, int roll, int bendInput, int bendAngle) {
   if (pitch < -30) {
     // Hands are raised
-    if (roll < 70) {
+    //if (roll < 70) {
+    if (bendInput > 200) {
       // Hands are rotated outward / CLAWS OUT
       return 0;
-    } else if (roll >= 70) {
+    //} else if (roll >= 70 && bendInput < 190) {
+    } else if (bendInput <= 200) {
       // Hands are rotated inward / FISTA CUFFS
       return 1;
     }
-  } else if (pitch > 10 && roll > 10) {
+  //} else if (pitch > 10 && roll > 10) {
+  } else if (pitch > 10) {
     // Hands are lowered / POWER POSE
     return 2;
   }
@@ -401,24 +416,46 @@ void prepareForNextRound() {
   roundWinner = null;
 }
 
+void printMove() {
+  if (player1Move >= 0) {
+   print("PLAYER 1: " + MOVES[player1Move] + " – ");
+  } else {
+    print("PLAYER 1: Invalid Move - ");
+  }
+  
+  if (player2Move >= 0) {
+   println("PLAYER 2: " + MOVES[player2Move]);
+  } else {
+   println("PLAYER 2: Invalid Move"); 
+  }
+}
+
 /*
  * Printing out data coming from Arduino
  */
 void printArduinoData() {
-  print("[PORT 1] Roll: ");
+  print("[P1] R: ");
   print(p1Move.get("roll"));
-  print(", Pitch: ");
+  print(", P: ");
   print(p1Move.get("pitch"));
-  print(", Heading: ");
+  print(", H: ");
   print(p1Move.get("heading"));
+  print(", BI: ");
+  print(p1Move.get("bendInput"));
+  print(", BA: ");
+  print(p1Move.get("bendAngle"));
   print("  |  ");
   
-  print("[PORT 2] Roll: ");
+  print("[P2] R: ");
   print(p2Move.get("roll"));
-  print(", Pitch: ");
+  print(", P: ");
   print(p2Move.get("pitch"));
-  print(", Heading: ");
-  println(p2Move.get("heading"));
+  print(", H: ");
+  print(p2Move.get("heading"));
+  print(", BI: ");
+  print(p2Move.get("bendInput"));
+  print(", BA: ");
+  println(p2Move.get("bendAngle"));
 }
 
 /* 
@@ -437,6 +474,8 @@ void serialEvent(Serial thisPort) {
     p1Move.put("roll", (int)float(list[0]));
     p1Move.put("pitch", (int)float(list[1]));
     p1Move.put("heading", (int)float(list[2]));
+    p1Move.put("bendInput", (int)float(list[3]));
+    p1Move.put("bendAngle", (int)float(list[4]));
   }
 
   if (thisPort == portTwo) {
@@ -444,6 +483,8 @@ void serialEvent(Serial thisPort) {
     p2Move.put("roll", (int)float(list[0]));
     p2Move.put("pitch", (int)float(list[1]));
     p2Move.put("heading", (int)float(list[2]));
+    p2Move.put("bendInput", (int)float(list[3]));
+    p2Move.put("bendAngle", (int)float(list[4]));
   }
 }
      
