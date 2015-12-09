@@ -116,15 +116,15 @@ void setup() {
   humiliationStartTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1500, 1500);
   humiliationEndTimer = CountdownTimerService.getNewCountdownTimer(this).configure(1500, 1500);
   
-  player1.addPoint();
-  player1.addPoint();
-  player2.addPoint();
-  player2.addPoint();
+  //player1.addPoint();
+  //player1.addPoint();
+  //player2.addPoint();
+  //player2.addPoint();
   
   gameOverSound = new SoundFile(pApplet, "sound-effects/winner-celebration.mp3");
   
   // Run serial connection when ports hardware is connected
-  //setupSerialConnection();
+  setupSerialConnection();
 }
 
 /*
@@ -178,15 +178,15 @@ void draw() {
   startCountdown.draw();
   popMatrix();
   
-  player1Move = floor(random(-1, 3));
-  player2Move = floor(random(-1, 3));
+  //player1Move = floor(random(-1, 3));
+  //player2Move = floor(random(-1, 3));
   //player1Move = 3;
   //player2Move = 3;
   
-  //if (captureMoves) {
-  // player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
-  // player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
-  //}
+  if (captureMoves) {
+    player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
+    player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
+  }
   ////player1Move = getMove(p1Move.get("pitch"), p1Move.get("roll"), p1Move.get("bendInput"), p1Move.get("bendAngle"));
   ////player2Move = getMove(p2Move.get("pitch"), p2Move.get("roll"), p2Move.get("bendInput"), p2Move.get("bendAngle"));
   

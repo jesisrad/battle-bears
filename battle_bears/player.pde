@@ -3,9 +3,9 @@
  * One of the players on the board.
  */
 class Player {
-  private final float GAME_OVER_ROTATE_TIME = 0.365;
+  private final float GAME_OVER_ROTATE_TIME = 0.3;
   private final float GAME_OVER_ROTATE_VALUE = 0.6;
-  private final float HUMILIATION_ROTATE_TIME = 0.3;
+  private final float HUMILIATION_ROTATE_TIME = 0.25;
   private final float HUMILIATION_ROTATE_VALUE = 0.5;
   
   private PFont _font;
@@ -260,8 +260,8 @@ class Player {
   private void _onRotateCelebrateEnd() {
     if (_isHumiliating) {
       float rotateDest = (_rotate < 0) ? GAME_OVER_ROTATE_VALUE : -GAME_OVER_ROTATE_VALUE;
-      _rotateAni = new Ani(this, GAME_OVER_ROTATE_TIME, 0.1, "_rotate", rotateDest, Ani.BACK_IN_OUT, "onEnd:_onRotateCelebrateEnd");
-      //_rotateAni = new Ani(this, _rotateTime * .5, 0.1, "_rotate", rotateDest, Ani.QUAD_IN_OUT, "onEnd:_onRotateCelebrateEnd");
+      //_rotateAni = new Ani(this, GAME_OVER_ROTATE_TIME, 0.1, "_rotate", rotateDest, Ani.BACK_IN_OUT, "onEnd:_onRotateCelebrateEnd");
+      _rotateAni = new Ani(this, GAME_OVER_ROTATE_TIME * .5, 0.1, "_rotate", rotateDest, Ani.QUAD_IN_OUT, "onEnd:_onRotateCelebrateEnd");
     } else {
       _rotateAni = new Ani(this, GAME_OVER_ROTATE_TIME, 0.1, "_rotate", 0, Ani.BACK_IN_OUT); 
     }
@@ -271,10 +271,10 @@ class Player {
   private void _onRotateEnd() {
     if (_isHumiliating) {
       float rotateDest = (_rotate < 0) ? HUMILIATION_ROTATE_VALUE : -HUMILIATION_ROTATE_VALUE;
-      //_rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", rotateDest, Ani.BACK_IN_OUT, "onEnd:_onRotate1End");
-      _rotateAni = new Ani(this, _rotateTime * .5, 0.1, "_rotate", rotateDest, Ani.QUAD_IN_OUT, "onEnd:_onRotateEnd");
+      _rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", rotateDest, Ani.BACK_IN_OUT, "onEnd:_onRotateEnd");
+      //_rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME * .5, 0.1, "_rotate", rotateDest, Ani.QUAD_IN_OUT, "onEnd:_onRotateEnd");
     } else {
-      _rotateAni = new Ani(this, _rotateTime, 0.1, "_rotate", 0, Ani.BACK_IN_OUT); 
+      _rotateAni = new Ani(this, HUMILIATION_ROTATE_TIME, 0.1, "_rotate", 0, Ani.BACK_IN_OUT); 
     }
     _rotateAni.start();
   }
